@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback — Lakeview by Westlake Systems</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f7f8fa;--surface:#fff;--border:#e4e6eb;--text:#0f1117;--text-2:#4b5262;--text-3:#8a92a3;--blue:#1a56db;--blue-light:#ebf0fd;--blue-text:#1a3a7c;--green:#0e7c4a;--green-light:#e6f5ee;--red:#9b1c1c;--red-light:#fde8e8;--amber:#92500a;--amber-light:#fef3e2;--radius:10px;--radius-sm:6px;--shadow:0 1px 3px rgba(0,0,0,.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 40px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:15px;font-weight:700;color:var(--blue)}
+.nav-back{font-size:13px;color:var(--text-3);text-decoration:none;display:flex;align-items:center;gap:6px}
+.nav-back:hover{color:var(--blue)}
+.wrap{max-width:600px;margin:48px auto;padding:0 24px 72px}
+.page-header{text-align:center;margin-bottom:36px}
+.page-header h1{font-size:26px;font-weight:700;letter-spacing:-.4px;margin-bottom:8px}
+.page-header p{font-size:14px;color:var(--text-3);line-height:1.6}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+.form-field{display:flex;flex-direction:column;gap:5px;margin-bottom:18px}
+.form-field label{font-size:12px;font-weight:600;color:var(--text-2)}
+.form-field input,.form-field textarea,.form-field select{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;color:var(--text);font-family:inherit;outline:none;background:var(--surface);transition:border .12s}
+.form-field input:focus,.form-field textarea:focus,.form-field select:focus{border-color:var(--blue)}
+.form-field textarea{resize:vertical;min-height:90px}
+.form-field .hint{font-size:11px;color:var(--text-3);margin-top:3px}
+.section-divider{height:1px;background:var(--border);margin:20px 0}
+/* Type selector */
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px}
+.type-card{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;cursor:pointer;transition:all .12s;background:var(--surface)}
+.type-card:hover{border-color:var(--blue);background:var(--blue-light)}
+.type-card.selected{border-color:var(--blue);background:var(--blue-light)}
+.type-card.selected .type-icon{transform:scale(1.1)}
+.type-icon{font-size:22px;margin-bottom:6px;transition:transform .15s}
+.type-label{font-size:12px;font-weight:600;color:var(--text-2)}
+.type-desc{font-size:11px;color:var(--text-3);margin-top:2px}
+/* Severity selector */
+.severity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:4px}
+.sev-card{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;cursor:pointer;transition:all .12s;background:var(--surface);display:flex;align-items:center;gap:10px}
+.sev-card:hover{border-color:var(--blue)}
+.sev-card.selected-broken{border-color:#ef4444;background:var(--red-light)}
+.sev-card.selected-degraded{border-color:#f59e0b;background:var(--amber-light)}
+.sev-card.selected-minor{border-color:#3b82f6;background:var(--blue-light)}
+.sev-card.selected-wish{border-color:#8b5cf6;background:#f5f3ff}
+.sev-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sev-info{flex:1}
+.sev-label{font-size:12px;font-weight:600;color:var(--text)}
+.sev-desc{font-size:11px;color:var(--text-3);margin-top:1px}
+/* Conditional sections */
+.conditional{display:none}
+.conditional.show{display:block}
+/* Submit button */
+.submit-btn{width:100%;padding:12px;background:var(--blue);color:#fff;font-size:14px;font-weight:600;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;transition:background .12s}
+.submit-btn:hover{background:#1648c0}
+/* Success state */
+.success{display:none;text-align:center;padding:40px 20px}
+.success-icon{font-size:48px;margin-bottom:16px}
+.success h2{font-size:20px;font-weight:700;margin-bottom:8px}
+.success p{font-size:14px;color:var(--text-3);margin-bottom:20px}
+.back-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+footer{text-align:center;padding:24px;font-size:12px;color:var(--text-3);border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--blue);text-decoration:none}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Lakeview</div>
+  <a class="nav-back" href="javascript:history.back()">← Back</a>
+</nav>
+
+<div class="wrap">
+  <div class="page-header">
+    <h1>Share your feedback</h1>
+    <p>Found a bug? Have a feature idea? We read every submission and use it to make Lakeview better for your whole team.</p>
+  </div>
+
+  <div class="card">
+    <div id="form-content">
+
+      <!-- Step 1: Type -->
+      <div class="form-field">
+        <label>What kind of feedback is this?</label>
+        <div class="type-grid">
+          <div class="type-card" onclick="selectType('bug',this)">
+            <div class="type-icon">🐛</div>
+            <div class="type-label">Bug report</div>
+            <div class="type-desc">Something isn't working right</div>
+          </div>
+          <div class="type-card" onclick="selectType('feature',this)">
+            <div class="type-icon">✨</div>
+            <div class="type-label">Feature request</div>
+            <div class="type-desc">Something you'd love to see added</div>
+          </div>
+          <div class="type-card" onclick="selectType('other',this)">
+            <div class="type-icon">💬</div>
+            <div class="type-label">General feedback</div>
+            <div class="type-desc">Anything else on your mind</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bug severity (shown for bugs) -->
+      <div class="conditional" id="bug-severity">
+        <div class="section-divider"></div>
+        <div class="form-field">
+          <label>How is this bug impacting your experience?</label>
+          <div class="severity-grid">
+            <div class="sev-card" onclick="selectSeverity('broken',this)">
+              <div class="sev-dot" style="background:#ef4444"></div>
+              <div class="sev-info"><div class="sev-label">Completely broken</div><div class="sev-desc">I can't use this feature at all</div></div>
+            </div>
+            <div class="sev-card" onclick="selectSeverity('degraded',this)">
+              <div class="sev-dot" style="background:#f59e0b"></div>
+              <div class="sev-info"><div class="sev-label">Working but broken</div><div class="sev-desc">It works but causes problems</div></div>
+            </div>
+            <div class="sev-card" onclick="selectSeverity('minor',this)">
+              <div class="sev-dot" style="background:#3b82f6"></div>
+              <div class="sev-info"><div class="sev-label">Minor issue</div><div class="sev-desc">Small annoyance, not blocking me</div></div>
+            </div>
+            <div class="sev-card" onclick="selectSeverity('wish',this)">
+              <div class="sev-dot" style="background:#8b5cf6"></div>
+              <div class="sev-info"><div class="sev-label">Just noticed it</div><div class="sev-desc">Not really impacting me yet</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>What part of Lakeview is this bug affecting?</label>
+          <select id="bug-impact-area">
+            <option value="">Select an area…</option>
+            <option>Dashboard</option>
+            <option>Device management</option>
+            <option>Asset lookup</option>
+            <option>Repair logging</option>
+            <option>Repair history</option>
+            <option>Team management</option>
+            <option>Account settings</option>
+            <option>Subscription</option>
+            <option>Google sign in</option>
+            <option>Copier status</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Feature reason (shown for features) -->
+      <div class="conditional" id="feature-reason-section">
+        <div class="section-divider"></div>
+        <div class="form-field">
+          <label>Why would this feature be valuable to you?</label>
+          <textarea id="feature-reason" placeholder="Tell us how this would improve your day-to-day work, what problem it would solve, or how often you'd use it…" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Common fields -->
+      <div class="form-field">
+        <label>Title <span style="color:var(--red)">*</span></label>
+        <input type="text" id="f-title" placeholder="Brief summary of your bug or request…">
+      </div>
+      <div class="form-field">
+        <label id="desc-label">Description <span style="color:var(--red)">*</span></label>
+        <textarea id="f-desc" rows="4" placeholder="Give us as much detail as you can…"></textarea>
+        <div class="hint" id="desc-hint">The more detail you provide, the faster we can fix it or build it.</div>
+      </div>
+      <div class="form-field">
+        <label>Your email <span style="font-weight:400;color:var(--text-3)">(so we can follow up)</span></label>
+        <input type="email" id="f-email" placeholder="you@yourcompany.com">
+      </div>
+
+      <button class="submit-btn" onclick="submitFeedback()">Submit feedback →</button>
+    </div>
+
+    <div class="success" id="success-state">
+      <div class="success-icon">🙌</div>
+      <h2>Thanks for the feedback!</h2>
+      <p>We've received your submission and will review it shortly. If you left your email we'll follow up with any updates.</p>
+      <button class="back-btn" onclick="window.location.href='https://westlakesystems.net/lakeview'">← Back to Lakeview</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Lakeview by <a href="https://westlakesystems.net">Westlake Systems</a> · <a href="mailto:support@westlakesystems.net">support@westlakesystems.net</a>
+</footer>
+
+<script>
+const SUPABASE_URL='https://zyqopodcrdwhfpybhzwc.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5cW9wb2RjcmR3aGZweWJoendjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NjM2OTIsImV4cCI6MjA5NzAzOTY5Mn0.krFOsWiP2ctPX4NknS6ddTA7malIJfP-WWAj0AAjmDU';
+const{createClient}=supabase;
+const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let selectedType=null,selectedSeverity=null;
+
+// Pre-fill email from URL param if coming from Lakeview
+const params=new URLSearchParams(window.location.search);
+if(params.get('email'))document.getElementById('f-email').value=params.get('email');
+if(params.get('org'))document.title='Feedback — '+params.get('org')+' — Lakeview';
+
+function selectType(type,el){
+  selectedType=type;
+  document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('bug-severity').classList.toggle('show',type==='bug');
+  document.getElementById('feature-reason-section').classList.toggle('show',type==='feature');
+  if(type==='bug'){
+    document.getElementById('desc-label').innerHTML='Describe the bug <span style="color:var(--red)">*</span>';
+    document.getElementById('f-desc').placeholder='What exactly happened? What did you expect to happen instead? Any steps to reproduce it?';
+    document.getElementById('desc-hint').textContent='Include any error messages you saw, what browser you\'re using, and steps to reproduce.';
+  } else if(type==='feature'){
+    document.getElementById('desc-label').innerHTML='Describe the feature <span style="color:var(--red)">*</span>';
+    document.getElementById('f-desc').placeholder='Describe what you\'d like to see and how it would work…';
+    document.getElementById('desc-hint').textContent='Be as specific as possible — mockups, examples, or comparisons to other tools all help.';
+  } else {
+    document.getElementById('desc-label').innerHTML='Your feedback <span style="color:var(--red)">*</span>';
+    document.getElementById('f-desc').placeholder='Tell us what\'s on your mind…';
+    document.getElementById('desc-hint').textContent='We read every piece of feedback and use it to improve Lakeview.';
+  }
+}
+
+function selectSeverity(sev,el){
+  selectedSeverity=sev;
+  document.querySelectorAll('.sev-card').forEach(c=>{c.className='sev-card';});
+  el.classList.add('selected-'+sev);
+}
+
+async function submitFeedback(){
+  const title=document.getElementById('f-title').value.trim();
+  const desc=document.getElementById('f-desc').value.trim();
+  if(!selectedType){alert('Please select a feedback type');return;}
+  if(!title){alert('Please enter a title');return;}
+  if(!desc){alert('Please add a description');return;}
+  try{
+    await sb.from('feedback').insert({
+      type:selectedType,
+      severity:selectedSeverity||null,
+      title,
+      description:desc,
+      impact:selectedType==='bug'?(document.getElementById('bug-impact-area').value||null):null,
+      feature_reason:selectedType==='feature'?(document.getElementById('feature-reason').value.trim()||null):null,
+      submitted_by:document.getElementById('f-email').value.trim()||null,
+      org_name:params.get('org')||null,
+    });
+    document.getElementById('form-content').style.display='none';
+    document.getElementById('success-state').style.display='block';
+  }catch(e){alert('Error submitting: '+e.message);}
+}
+</script>
+</body>
+</html>

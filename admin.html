@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lakeview Admin — Westlake Systems</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+<style>
+:root{--bg:#f7f8fa;--surface:#fff;--border:#e4e6eb;--text:#0f1117;--text-2:#4b5262;--text-3:#8a92a3;--blue:#1a56db;--blue-light:#ebf0fd;--blue-text:#1a3a7c;--green:#0e7c4a;--green-light:#e6f5ee;--amber:#92500a;--amber-light:#fef3e2;--red:#9b1c1c;--red-light:#fde8e8;--radius:10px;--radius-sm:6px;--shadow:0 1px 3px rgba(0,0,0,.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.topbar{background:#0f1117;padding:0 32px;height:52px;display:flex;align-items:center;gap:16px;border-bottom:1px solid #2a2a3a}
+.topbar-logo{font-size:15px;font-weight:700;color:#fff}
+.topbar-logo span{color:#3b82f6}
+.topbar-badge{font-size:11px;font-weight:600;background:#ef4444;color:#fff;padding:2px 8px;border-radius:20px}
+.topbar-user{margin-left:auto;font-size:12px;color:#6b7280}
+.sign-out{font-size:12px;color:#6b7280;background:none;border:none;cursor:pointer;font-family:inherit;margin-left:12px}
+.sign-out:hover{color:#fff}
+.content{max-width:1100px;margin:0 auto;padding:32px}
+.page-header{margin-bottom:28px}
+.page-header h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+.page-header p{font-size:13px;color:var(--text-3);margin-top:4px}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+.metric-label{font-size:12px;color:var(--text-3);margin-bottom:6px}
+.metric-value{font-size:26px;font-weight:700;letter-spacing:-.5px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:20px}
+.card-title{font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 12px;font-size:11px;font-weight:600;color:var(--text-3);border-bottom:1px solid var(--border);background:var(--bg);text-transform:uppercase;letter-spacing:.4px}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--bg)}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px}
+.badge-green{background:var(--green-light);color:var(--green)}
+.badge-amber{background:var(--amber-light);color:var(--amber)}
+.badge-red{background:var(--red-light);color:var(--red)}
+.badge-blue{background:var(--blue-light);color:var(--blue-text)}
+.badge-gray{background:var(--bg);color:var(--text-2);border:1px solid var(--border)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:all .12s;font-family:inherit}
+.btn:hover{background:var(--bg)}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:#1648c0}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-danger{background:var(--red-light);color:var(--red);border-color:transparent}
+.form-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap}
+.form-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px}
+.form-field label{font-size:11px;font-weight:600;color:var(--text-2)}
+.form-field input,.form-field select{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text);font-family:inherit;outline:none;background:var(--surface)}
+.form-field input:focus,.form-field select:focus{border-color:var(--blue)}
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f1117}
+.auth-card{background:#1a1a2e;border:1px solid #2a2a3a;border-radius:var(--radius);padding:40px;width:100%;max-width:400px}
+.auth-title{font-size:20px;font-weight:700;color:#fff;text-align:center;margin-bottom:6px}
+.auth-sub{font-size:13px;color:#6b7280;text-align:center;margin-bottom:28px}
+.auth-badge{background:#ef4444;color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block;margin:0 auto 20px;display:block;text-align:center;width:fit-content;margin:0 auto 20px}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px;border:1px solid #2a2a3a;border-radius:var(--radius-sm);background:#1a1a2e;cursor:pointer;font-size:14px;font-weight:500;color:#fff;font-family:inherit;transition:all .12s}
+.google-btn:hover{background:#252540}
+.access-denied{text-align:center;padding:48px;color:#6b7280}
+.access-denied h2{font-size:20px;font-weight:700;color:#ef4444;margin-bottom:8px}
+.toast{position:fixed;bottom:24px;right:24px;background:#1a2035;color:#fff;padding:12px 18px;border-radius:var(--radius);font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.3);transform:translateY(80px);opacity:0;transition:all .25s;z-index:9999}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{background:#9b1c1c}
+.loading{color:var(--text-3);padding:20px;text-align:center}
+select.inline{padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit;outline:none;background:var(--surface);cursor:pointer}
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-badge">🔐 ADMIN ONLY</div>
+      <div class="auth-title">Lakeview Admin</div>
+      <div class="auth-sub">This area is restricted to Westlake Systems administrators only.</div>
+      <button class="google-btn" id="google-sign-in-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Sign in with Google
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="denied-screen" style="display:none">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="access-denied">
+        <h2>Access Denied</h2>
+        <p>This panel is restricted to Westlake Systems administrators.</p>
+        <button class="btn btn-danger" onclick="signOut()" style="margin-top:20px">Sign out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="admin-screen" style="display:none">
+  <div class="topbar">
+    <div class="topbar-logo">Lakeview <span>Admin</span></div>
+    <span class="topbar-badge">SUPER ADMIN</span>
+    <span class="topbar-user" id="admin-user-email">—</span>
+    <button class="sign-out" onclick="signOut()">Sign out</button>
+  </div>
+  <div class="content">
+    <div class="page-header">
+      <h1>Westlake Systems Admin Panel</h1>
+      <p>Manage all Lakeview organizations, subscriptions, and access</p>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Total organizations</div><div class="metric-value" id="a-orgs">—</div></div>
+      <div class="metric"><div class="metric-label">Active subscriptions</div><div class="metric-value" id="a-active">—</div></div>
+      <div class="metric"><div class="metric-label">Trial accounts</div><div class="metric-value" id="a-trial">—</div></div>
+      <div class="metric"><div class="metric-label">Total devices tracked</div><div class="metric-value" id="a-devices">—</div></div>
+    </div>
+
+    <!-- Grant Access -->
+    <div class="card">
+      <div class="card-title">Grant free / custom access</div>
+      <div class="form-row">
+        <div class="form-field"><label>Organization name or email</label><input type="text" id="grant-email" placeholder="e.g. user@company.com or search org name"></div>
+        <div class="form-field" style="max-width:150px"><label>Plan</label>
+          <select id="grant-plan"><option value="trial">Trial</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="business">Business</option><option value="enterprise">Enterprise</option></select>
+        </div>
+        <div class="form-field" style="max-width:130px"><label>Device limit</label><input type="number" id="grant-limit" value="999999"></div>
+        <div class="form-field" style="max-width:200px"><label>Notes</label><input type="text" id="grant-notes" placeholder="e.g. Beta tester"></div>
+        <button class="btn btn-primary" style="flex-shrink:0" onclick="grantAccess()">Grant access</button>
+      </div>
+    </div>
+
+    <!-- All Organizations -->
+    <div class="card">
+      <div class="card-title">
+        All organizations
+        <button class="btn btn-sm" onclick="loadAdmin()">↻ Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Organization</th><th>Admin email</th><th>Plan</th><th>Status</th><th>Devices</th><th>Device limit</th><th>Trial ends</th><th>Notes</th><th>Actions</th></tr></thead>
+          <tbody id="admin-orgs-tbody"><tr><td colspan="9" class="loading">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Feedback inbox -->
+    <div class="card">
+      <div class="card-title">
+        Feedback inbox
+        <button class="btn btn-sm" onclick="loadAdmin()">↻ Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Type</th><th>Severity</th><th>Title</th><th>Area</th><th>Submitted by</th><th>Org</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="admin-feedback-tbody"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Recent signups -->
+    <div class="card">
+      <div class="card-title">Recent signups</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Organization</th><th>Email</th><th>Joined</th><th>Plan</th></tr></thead>
+          <tbody id="admin-recent-tbody"><tr><td colspan="4" class="loading">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL='https://zyqopodcrdwhfpybhzwc.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5cW9wb2RjcmR3aGZweWJoendjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NjM2OTIsImV4cCI6MjA5NzAzOTY5Mn0.krFOsWiP2ctPX4NknS6ddTA7malIJfP-WWAj0AAjmDU';
+const SUPER_ADMIN_EMAIL='coltonwestlake@westlakesystems.net';
+let sb=null, adminUser=null;
+
+async function signIn(){
+  await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://westlakesystems.net/adminpanel/westlakesystems'}});
+}
+async function signOut(){await sb.auth.signOut();location.reload();}
+
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');setTimeout(()=>t.className='toast',3200);}
+
+async function init(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){show('auth');return;}
+  adminUser=session.user;
+  if(adminUser.email!==SUPER_ADMIN_EMAIL){show('denied');return;}
+  document.getElementById('admin-user-email').textContent=adminUser.email;
+  show('admin');
+  loadAdmin();
+}
+
+function show(name){
+  ['auth-screen','denied-screen','admin-screen'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById(name+'-screen').style.display='';
+}
+
+async function loadAdmin(){
+  try{
+    const[{data:orgs},{data:subs},{data:devices},{data:members},{data:feedback}]=await Promise.all([
+      sb.from('organizations').select('*').order('created_at',{ascending:false}),
+      sb.from('subscriptions').select('*'),
+      sb.from('devices').select('id,org_id'),
+      sb.from('org_members').select('*').eq('role','admin').eq('accepted',true),
+      sb.from('feedback').select('*').order('created_at',{ascending:false}).limit(50)
+    ]);
+
+    document.getElementById('a-orgs').textContent=(orgs||[]).length;
+    document.getElementById('a-active').textContent=(subs||[]).filter(s=>s.status==='active'&&s.plan!=='trial').length;
+    document.getElementById('a-trial').textContent=(subs||[]).filter(s=>s.plan==='trial').length;
+    document.getElementById('a-devices').textContent=(devices||[]).length;
+
+    const planColors={trial:'badge-gray',starter:'badge-blue',pro:'badge-blue',business:'badge-blue',enterprise:'badge-green'};
+
+    const tbody=document.getElementById('admin-orgs-tbody');
+    if(!orgs||!orgs.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#8a92a3">No organizations yet</td></tr>';return;}
+
+    tbody.innerHTML=orgs.map(org=>{
+      const sub=subs?subs.find(s=>s.org_id===org.id):null;
+      const devCount=(devices||[]).filter(d=>d.org_id===org.id).length;
+      const admin=members?members.find(m=>m.org_id===org.id):null;
+      const plan=sub?sub.plan:'none';
+      const trialEnd=sub&&sub.trial_ends_at?new Date(sub.trial_ends_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+      return `<tr>
+        <td><strong>${org.name}</strong></td>
+        <td style="font-size:12px;color:#4b5262">${admin?admin.invited_email:'—'}</td>
+        <td><span class="badge ${planColors[plan]||'badge-gray'}">${plan}</span></td>
+        <td><span class="badge ${sub&&sub.status==='active'?'badge-green':'badge-gray'}">${sub?sub.status:'no sub'}</span></td>
+        <td>${devCount}</td>
+        <td>${sub?sub.device_limit===999999?'Unlimited':sub.device_limit:'—'}</td>
+        <td style="font-size:12px;color:#8a92a3">${trialEnd}</td>
+        <td style="font-size:12px;color:#8a92a3;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sub?sub.notes||'—':'—'}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <select class="inline" onchange="changePlan('${org.id}','${sub?sub.id:''}',this.value)" title="Change plan">
+              <option value="">Change plan…</option>
+              <option value="trial">Trial</option>
+              <option value="starter">Starter</option>
+              <option value="pro">Pro</option>
+              <option value="business">Business</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+            <button class="btn btn-sm btn-danger" onclick="revokeAccess('${org.id}','${sub?sub.id:''}')">Revoke</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    // Feedback inbox
+    const ftbody=document.getElementById('admin-feedback-tbody');
+    const typeColors={bug:'badge-red',feature:'badge-blue',other:'badge-gray'};
+    const sevColors={broken:'badge-red',degraded:'badge-amber',minor:'badge-blue',wish:'badge-gray'};
+    const sevLabels={broken:'🔴 Broken',degraded:'🟡 Working but broken',minor:'🔵 Minor',wish:'🟣 Wish'};
+    if(!feedback||!feedback.length){
+      ftbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#8a92a3">No feedback yet</td></tr>';
+    } else {
+      ftbody.innerHTML=feedback.map(f=>`<tr>
+        <td><span class="badge ${typeColors[f.type]||'badge-gray'}">${f.type}</span></td>
+        <td>${f.severity?`<span class="badge ${sevColors[f.severity]||'badge-gray'}" style="font-size:10px">${sevLabels[f.severity]||f.severity}</span>`:'—'}</td>
+        <td style="max-width:200px"><div style="font-weight:500;font-size:13px">${f.title}</div><div style="font-size:11px;color:#8a92a3;margin-top:2px">${(f.description||'').substring(0,60)}${f.description&&f.description.length>60?'…':''}</div></td>
+        <td style="font-size:12px;color:#4b5262">${f.impact||'—'}</td>
+        <td style="font-size:12px;color:#4b5262">${f.submitted_by||'Anonymous'}</td>
+        <td style="font-size:12px;color:#8a92a3">${f.org_name||'—'}</td>
+        <td style="font-size:12px;color:#8a92a3">${new Date(f.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td>
+        <td><select class="inline" onchange="updateFeedbackStatus('${f.id}',this.value)">
+          <option ${f.status==='new'?'selected':''} value="new">New</option>
+          <option ${f.status==='in review'?'selected':''} value="in review">In review</option>
+          <option ${f.status==='planned'?'selected':''} value="planned">Planned</option>
+          <option ${f.status==='resolved'?'selected':''} value="resolved">Resolved</option>
+        </select></td>
+      </tr>`).join('');
+    }
+
+    // Recent signups
+    const recent=document.getElementById('admin-recent-tbody');
+    const recentOrgs=(orgs||[]).slice(0,10);
+    recent.innerHTML=recentOrgs.map(org=>{
+      const sub=subs?subs.find(s=>s.org_id===org.id):null;
+      const admin=members?members.find(m=>m.org_id===org.id):null;
+      return `<tr>
+        <td><strong>${org.name}</strong></td>
+        <td style="font-size:12px">${admin?admin.invited_email:'—'}</td>
+        <td style="font-size:12px;color:#8a92a3">${new Date(org.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
+        <td><span class="badge ${planColors[sub?sub.plan:'none']||'badge-gray'}">${sub?sub.plan:'none'}</span></td>
+      </tr>`;
+    }).join('');
+
+  }catch(e){toast('Error loading: '+e.message,'error');}
+}
+
+async function grantAccess(){
+  const email=document.getElementById('grant-email').value.trim();
+  const plan=document.getElementById('grant-plan').value;
+  const limit=parseInt(document.getElementById('grant-limit').value)||999999;
+  const notes=document.getElementById('grant-notes').value.trim();
+  if(!email){toast('Please enter an email or org name','error');return;}
+  try{
+    // Find org by member email
+    const{data:member}=await sb.from('org_members').select('org_id').eq('invited_email',email).eq('accepted',true).single();
+    if(!member){toast('No organization found for that email','error');return;}
+    // Upsert subscription
+    const{data:existing}=await sb.from('subscriptions').select('id').eq('org_id',member.org_id).single();
+    if(existing){
+      await sb.from('subscriptions').update({plan,status:'active',device_limit:limit,granted_by:adminUser.email,notes}).eq('id',existing.id);
+    } else {
+      await sb.from('subscriptions').insert({org_id:member.org_id,plan,status:'active',device_limit:limit,granted_by:adminUser.email,notes});
+    }
+    toast(`✓ ${plan} access granted to ${email}`);
+    document.getElementById('grant-email').value='';
+    document.getElementById('grant-notes').value='';
+    loadAdmin();
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+async function changePlan(orgId,subId,plan){
+  if(!plan)return;
+  try{
+    if(subId){
+      await sb.from('subscriptions').update({plan,status:'active',granted_by:adminUser.email}).eq('id',subId);
+    } else {
+      await sb.from('subscriptions').insert({org_id:orgId,plan,status:'active',device_limit:50,granted_by:adminUser.email});
+    }
+    toast(`✓ Plan updated to ${plan}`);
+    loadAdmin();
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+async function updateFeedbackStatus(id,status){
+  try{
+    await sb.from('feedback').update({status}).eq('id',id);
+    toast('Status updated to '+status);
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+async function revokeAccess(orgId,subId){
+  if(!confirm('Revoke access for this organization?'))return;
+  try{
+    if(subId){
+      await sb.from('subscriptions').update({status:'cancelled'}).eq('id',subId);
+      toast('Access revoked');
+    } else {
+      toast('No subscription to revoke','error');
+    }
+    loadAdmin();
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+window.addEventListener('load',()=>{
+  const{createClient}=supabase;
+  sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+  document.getElementById('google-sign-in-btn').addEventListener('click', signIn);
+  sb.auth.onAuthStateChange(async(_event,session)=>{
+    if(_event==='SIGNED_IN'&&session){
+      adminUser=session.user;
+      window.history.replaceState({},'',window.location.pathname);
+      if(adminUser.email!==SUPER_ADMIN_EMAIL){show('denied');}
+      else{document.getElementById('admin-user-email').textContent=adminUser.email;show('admin');loadAdmin();}
+    }else if(_event==='SIGNED_OUT'){show('auth');}
+  });
+  init();
+});
+</script>
+</body>
+</html>
