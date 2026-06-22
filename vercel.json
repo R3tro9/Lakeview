@@ -1,16 +1,10 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "lakeview.html",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/lakeview.html"
-    }
+    { "src": "/lakeview", "dest": "/lakeview.html" },
+    { "src": "/adminpanel/westlakesystems", "dest": "/admin.html" },
+    { "src": "/feedback", "dest": "/feedback.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ],
   "headers": [
     {
